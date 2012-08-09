@@ -306,7 +306,7 @@ public class CFSReader{
 	public class DataSection{
 		public GeneralDataSectionHeader generalDataSectionHeader;
 		public DSChannelInformation[] dschannelInformation;
-		public short[][] channelData;
+		public double[][] channelData;
 		/*post read pointer*/
 		public int currentOffset;
 		public int dataSectionStartOffset;
@@ -324,11 +324,11 @@ public class CFSReader{
 				currentOffset = dschannelInformation[i].postOffset;
 			}
 			/*Read Data*/
-			channelData = new short[cfsReader.header.channelNo][];
+			channelData = new double[cfsReader.header.channelNo][];
 			for (int i = 0;i<cfsReader.header.channelNo;++i){
-				channelData[i] = new short[dschannelInformation[i].dataPoints];
+				channelData[i] = new double[dschannelInformation[i].dataPoints];
 				for (int j = 0; j<dschannelInformation[i].dataPoints;++j){
-					channelData[i][j] = CFSReader.readShort(data,generalDataSectionHeader.pointerToChannelData+dschannelInformation[i].offsetInDataSectionToFirstByte+j*channelInfo[i].byteSpaceBetweenElements);
+					channelData[i][j] = ((double) (CFSReader.readShort(data,generalDataSectionHeader.pointerToChannelData+dschannelInformation[i].offsetInDataSectionToFirstByte+j*channelInfo[i].byteSpaceBetweenElements)))*(double)dschannelInformation[i].yScale;
 				}
 			}
 			
