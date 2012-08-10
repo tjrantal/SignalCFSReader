@@ -1,0 +1,7 @@
+Signal CFS-file reader
+
+A minimally implemented cfs-reader. Works only for a very specific kind of cfs-file produced by the Signal program used for measurements at the University of Jyväskylä. The reader was written for my own needs and consequently no error handling is implemented (other than the little mandated by the java compiler...) and very few comments are found from the code.
+
+I am using the code to import the measured data into Octave (or Matlab). Please do not hesitate to contact me to get going with the code (as it will undoubtedly be research related).
+
+Written by Timo Rantalainen 2012 (tjrantal at gmail dot com)
