@@ -4,4 +4,6 @@ A minimally implemented cfs-reader. Works only for a very specific kind of cfs-f
 
 I am using the code to import the measured data into Octave (or Matlab). Please do not hesitate to contact me to get going with the code (as it will undoubtedly be research related).
 
+testCFSReader.m contains some sample matlab code for testing the reader.
+
 Written by Timo Rantalainen 2012 (tjrantal at gmail dot com)
