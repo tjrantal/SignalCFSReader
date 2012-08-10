@@ -14,6 +14,7 @@ public class CFSReader{
 	public DataSection[] datasection;
 	public ChannelInformation[] channelInfo;
 	public int currentOffset;
+	public boolean readSuccessfull;
 	/*Constants taken from cfc.h from www.ced.co.uk*/
 	public static final int FILEVAR		=0;              // constants to indicate whether variable is 
 	public static final int DSVAR		=1;                         // file or data section variable. 
@@ -40,47 +41,54 @@ public class CFSReader{
 		currentOffset =  header.postOffset;
 		header.print();
 		
-		/*Channel Information*/
-		 channelInfo = new ChannelInformation[header.channelNo];
-		for (int i = 0;i<header.channelNo;++i){
-			channelInfo[i] = new ChannelInformation(fileData, currentOffset);
-			currentOffset = channelInfo[i].postOffset;
-		}
-		
-		/*File var info*/
-		FileVariableInformation[] fileVarInfo = new FileVariableInformation[header.fileVarNo+1];
-		for (int i = 0;i<header.fileVarNo+1;++i){
-			fileVarInfo[i] = new FileVariableInformation(fileData, currentOffset);
-			currentOffset = fileVarInfo[i].postOffset;
-		}
-				
-		//Data section var info. N.B. the strucuture is similar to file var info
-		FileVariableInformation[] dataSectionVarInfo = new FileVariableInformation[header.dataSectionVarNo+1];
-		for (int i = 0;i<header.dataSectionVarNo+1;++i){
-			dataSectionVarInfo[i] = new FileVariableInformation(fileData, currentOffset);
-			currentOffset = dataSectionVarInfo[i].postOffset;
-		}
-		
-		
-		/*Skip file vars...*/
-		currentOffset += fileVarInfo[header.fileVarNo].byteOffset;
-		System.out.println("DS start "+currentOffset);
-		
-		 /*Get dataSection Pointers*/
-		int[] dataSectionPointers = new int[header.numberOfDataSections];
-		currentOffset = header.pointerTableOffset;
-		for (int i = 0;i<header.numberOfDataSections;++i){//1;++i){//
-			System.out.println("Reading pointer");
-			dataSectionPointers[i] = readLong(fileData,currentOffset);
-			System.out.println("Pointer "+i+":"+dataSectionPointers[i]);
-			currentOffset +=4;
-		}
-		System.out.println("Got the DS pointers");
-		/*Read Data Sections*/
-		datasection = new DataSection[header.numberOfDataSections];
-		for (int i = 0;i<dataSectionPointers.length;++i){//1;++i){//
-			System.out.println("DS Header "+i);
-			datasection[i] = new DataSection(fileData, dataSectionPointers[i],this);
+		/*Check for corrupted files...*/
+		readSuccessfull = false;
+		if (header.pointerTableOffset < fileData.length){ //If pointerTableOffset is out of file the file must be corrupted...
+			readSuccessfull = true;
+			/*Channel Information*/
+			 channelInfo = new ChannelInformation[header.channelNo];
+			for (int i = 0;i<header.channelNo;++i){
+				channelInfo[i] = new ChannelInformation(fileData, currentOffset);
+				currentOffset = channelInfo[i].postOffset;
+			}
+			
+			/*File var info*/
+			FileVariableInformation[] fileVarInfo = new FileVariableInformation[header.fileVarNo+1];
+			for (int i = 0;i<header.fileVarNo+1;++i){
+				fileVarInfo[i] = new FileVariableInformation(fileData, currentOffset);
+				currentOffset = fileVarInfo[i].postOffset;
+			}
+					
+			//Data section var info. N.B. the strucuture is similar to file var info
+			FileVariableInformation[] dataSectionVarInfo = new FileVariableInformation[header.dataSectionVarNo+1];
+			for (int i = 0;i<header.dataSectionVarNo+1;++i){
+				dataSectionVarInfo[i] = new FileVariableInformation(fileData, currentOffset);
+				currentOffset = dataSectionVarInfo[i].postOffset;
+			}
+			
+			
+			/*Skip file vars...*/
+			currentOffset += fileVarInfo[header.fileVarNo].byteOffset;
+			System.out.println("DS start "+currentOffset);
+			
+			 /*Get dataSection Pointers*/
+			int[] dataSectionPointers = new int[header.numberOfDataSections];
+			currentOffset = header.pointerTableOffset;
+			for (int i = 0;i<header.numberOfDataSections;++i){//1;++i){//
+				System.out.println("Reading pointer");
+				dataSectionPointers[i] = readLong(fileData,currentOffset);
+				System.out.println("Pointer "+i+":"+dataSectionPointers[i]);
+				currentOffset +=4;
+			}
+			System.out.println("Got the DS pointers");
+			/*Read Data Sections*/
+			datasection = new DataSection[header.numberOfDataSections];
+			for (int i = 0;i<dataSectionPointers.length;++i){//1;++i){//
+				System.out.println("DS Header "+i);
+				datasection[i] = new DataSection(fileData, dataSectionPointers[i],this);
+			}
+		}else{
+			System.out.println("Pointer offset table not found");
 		}
 	}
 	
